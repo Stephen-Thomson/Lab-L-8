@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Container, TextField, Button, Card, CardContent, Typography, Grid, MenuItem } from '@mui/material'
 import pushdrop from 'pushdrop'
 import { createAction, getTransactionOutputs } from '@babbage/sdk-ts'
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from 'uuid' // v4 refers to version 4 of the UUID, which generates random UUIDs.
 import { EnvelopeApi } from '@babbage/sdk-ts'
 
 // Define the structure of a card
@@ -52,7 +52,6 @@ const App: React.FC = () => {
 
       // Generate unique key ID for the card
       const keyID = generateUniqueKeyID()
-      console.log('Generated KeyID:', keyID)
 
       // Create the locking script using pushdrop.create
       const cardAttributes = {
@@ -69,11 +68,11 @@ const App: React.FC = () => {
       })
 
       // Create the blockchain transaction using createAction
-      const newCardAction = await createAction({
+      await createAction({
         outputs: [
           {
             satoshis: sats,
-            script: outputScript, // Use the correct variable here
+            script: outputScript,
             basket: 'game_collectibles',
             customInstructions: JSON.stringify({
               keyID,
@@ -153,12 +152,6 @@ const App: React.FC = () => {
     setIsLoading(true);
     try {
         const cardKeyID = card.keyID;
-        console.log('Redeeming with KeyID:', cardKeyID);
-
-        // Log transaction details
-        console.log('Transaction ID (txid):', card.txid);
-        console.log('Output Index (outputIndex):', card.outputIndex);
-        console.log('Locking Script (outputScript):', card.outputScript);
 
         // Ensure that txid, outputIndex, and lockingScript are valid
         if (!card.txid || card.outputIndex === undefined || !card.outputScript) {
@@ -174,25 +167,22 @@ const App: React.FC = () => {
             lockingScript: card.outputScript,
             outputAmount: card.sats,
         });
-        console.log('Unlock script created:', unlockScript);
 
         // Create a new action (transaction) that redeems the card
-        // Create a new action (transaction) that redeems the card
-const action = await createAction({
-  inputs: {
-      [card.txid]: {
-          ...card.envelope,  // Spread the envelope (token) properties here
-          outputsToRedeem: [
-              {
-                  index: card.outputIndex,
-                  unlockingScript: unlockScript, // Unlocking script provided by PushDrop
-              }
-          ],
-      },
-  },
-  description: `Redeeming collectible card: ${card.name}`,
-});
-console.log('Action created:', action);
+        const action = await createAction({
+          inputs: {
+              [card.txid]: {
+                  ...card.envelope,  // Spread the envelope (token) properties here
+                  outputsToRedeem: [
+                      {
+                          index: card.outputIndex,
+                          unlockingScript: unlockScript, // Unlocking script provided by PushDrop
+                      }
+                  ],
+              },
+          },
+          description: `Redeeming collectible card: ${card.name}`,
+        });
 
         // Reload the cards after redeeming
         await loadCards();
@@ -205,7 +195,6 @@ console.log('Action created:', action);
         setIsLoading(false);
     }
 };
-
 
   return (
     <Container maxWidth="md" sx={{ paddingTop: '3em' }}>
